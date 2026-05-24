@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "DevAura Wellness Companion",
+  "version": "0.1.0",
+  "description": "Smart context-aware browser tracker that coordinates meeting activities and screen shares for DevAura.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://localhost:8080/*",
+    "https://*.google.com/*",
+    "https://*.zoom.us/*",
+    "https://*.microsoft.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "DevAura Wellness Status"
+  }
+}

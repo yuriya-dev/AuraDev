@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevAura Browser Companion</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
+    :root {
+      --bg: #121212;
+      --surface: #1E1E1E;
+      --text: #E3E3E3;
+      --text-sub: #a0aec0;
+      --primary: #0B57D0; /* Google Blue */
+      --secondary: #1EA896; /* Teal */
+      --accent-coral: #EA4335;
+      --border: rgba(255, 255, 255, 0.06);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+      width: 320px;
+      min-height: 240px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--secondary);
+      box-shadow: 0 0 6px var(--secondary);
+    }
+
+    .status-badge {
+      background: rgba(30, 168, 150, 0.1);
+      border: 1px solid rgba(30, 168, 150, 0.2);
+      color: var(--secondary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+
+    /* MD3 Card styling */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .grid-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+    }
+
+    .highlight {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .highlight.active {
+      color: var(--secondary);
+    }
+
+    .highlight.meeting {
+      color: var(--accent-coral);
+    }
+
+    /* Material Toggles */
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+
+    .toggle-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 99px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+
+    /* Button Tonal styling */
+    .btn-sync {
+      background: rgba(11, 87, 208, 0.15);
+      color: #8ab4f8;
+      border: 1px solid rgba(11, 87, 208, 0.3);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn-sync:hover {
+      background: rgba(11, 87, 208, 0.25);
+      border-color: #8ab4f8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-dot"></div>
+        DevAura Browser
+      </div>
+      <div class="status-badge" id="syncStatus">Synced</div>
+    </header>
+
+    <!-- Meeting status -->
+    <div class="card">
+      <div class="card-title">Meeting Guard Status</div>
+      <div class="grid-info">
+        <span>Active Call Monitor:</span>
+        <span class="highlight" id="meetingState">No active calls</span>
+      </div>
+    </div>
+
+    <!-- GPS status -->
+    <div class="card">
+      <div class="card-title">GPS Coordinates (Prayer Times)</div>
+      <div class="grid-info">
+        <span>Location:</span>
+        <span class="highlight active" id="gpsCoords">-6.2088, 106.8456</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="card" style="display: flex; flex-direction: column; gap: 4px;">
+      <div class="card-title">Companion Controls</div>
+      
+      <div class="toggle-row">
+        <span class="toggle-label">Auto-detect GPS Location</span>
+        <label class="switch">
+          <input type="checkbox" id="gpsToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">Mute Reminders in Meetings</span>
+        <label class="switch">
+          <input type="checkbox" id="muteToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <button class="btn-sync" id="btnRefresh">Refresh Cloud State</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
