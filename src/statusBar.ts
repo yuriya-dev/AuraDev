@@ -34,22 +34,47 @@ export class DevAuraStatusBar {
   }
 
   /**
-   * Update the status bar based on state changes
+   * Update the status bar based on state changes and backend check results
    */
-  public update(state: FocusState, stats: TrackerStats) {
+  public update(
+    state: FocusState,
+    stats: TrackerStats,
+    upcomingPrayer = 'None',
+    minsToPrayer: number | null = null,
+    wellnessScore = 85
+  ) {
     const stateConfig = this.getStateConfig(state);
     
-    // Format label
+    // Set dynamic color based on state, overriding with Coral alert if extremely frustrated
+    let stateColor = stateConfig.color;
+    let stateLabel = stateConfig.label;
+    
+    if (stats.frustrationScore > 70) {
+      stateColor = '#EA4335'; // Coral Alert/Overtime
+      stateLabel = 'Overloaded';
+    }
+
+    // Format time to short (e.g. 2h 15m or 2m)
+    const timeStr = this.formatTimeShort(stats.totalTimeSeconds);
+
+    // Format prayer segment
+    const prayerStr = upcomingPrayer !== 'None' && minsToPrayer !== null
+      ? ` 🕌 Next: ${upcomingPrayer} (${minsToPrayer}m)`
+      : ` 🕌 Next: --`;
+
     const muteIndicator = this._isMuted ? ' 🔇' : '';
-    this._statusBarItem.text = `${stateConfig.icon} DevAura: ${stateConfig.label}${muteIndicator}`;
-    this._statusBarItem.color = stateConfig.color;
+
+    // Apply combined Material You layout:
+    // 🔮 DevAura: Deep Focus (2h 15m) | 🕌 Next: Dhuhr (45m) | ✨ Score: 85
+    this._statusBarItem.text = `🔮 DevAura: ${stateLabel} (${timeStr}) |${prayerStr} | ✨ Score: ${wellnessScore}${muteIndicator}`;
+    this._statusBarItem.color = stateColor;
     
     // Structured tooltip info (using markdown for a premium feel!)
     const tooltipMarkdown = new vscode.MarkdownString();
     tooltipMarkdown.isTrusted = true;
     
-    tooltipMarkdown.appendMarkdown(`### ✨ **DevAura — Life OS**\n\n`);
-    tooltipMarkdown.appendMarkdown(`**Current State:** ${stateConfig.icon} *${stateConfig.label}*\n\n`);
+    tooltipMarkdown.appendMarkdown(`### 🔮 **DevAura — Material You**\n\n`);
+    tooltipMarkdown.appendMarkdown(`**Mental State:** *${stateLabel}* (${stateConfig.icon})\n\n`);
     tooltipMarkdown.appendMarkdown(`---\n\n`);
     tooltipMarkdown.appendMarkdown(`📊 **Metrics (Session)**\n`);
     tooltipMarkdown.appendMarkdown(`* ⌨️ Keystrokes: \`${stats.keystrokes}\`\n`);
@@ -58,10 +83,18 @@ export class DevAuraStatusBar {
     tooltipMarkdown.appendMarkdown(`* ⏱️ Time Active: \`${this.formatTime(stats.totalTimeSeconds)}\`\n`);
     tooltipMarkdown.appendMarkdown(`* 🤯 Frustration Index: \`${stats.frustrationScore}%\`\n\n`);
     
-    if (state === 'frustrated') {
-      tooltipMarkdown.appendMarkdown(`> ⚠️ **Frustration detected!** Maybe take a 5-minute stretch or a drink of water? 💧\n\n`);
+    tooltipMarkdown.appendMarkdown(`---\n\n`);
+    tooltipMarkdown.appendMarkdown(`🕌 **Ibadah Guardian**\n`);
+    if (upcomingPrayer !== 'None' && minsToPrayer !== null) {
+      tooltipMarkdown.appendMarkdown(`* Next Prayer: **${upcomingPrayer}** in **${minsToPrayer} minutes**\n\n`);
+    } else {
+      tooltipMarkdown.appendMarkdown(`* Prayer Schedule synced offline\n\n`);
+    }
+
+    if (stats.frustrationScore > 70) {
+      tooltipMarkdown.appendMarkdown(`> 🔴 **Coral Alert!** Extreme frustration detected. Stop coding and take a 5-minute wudhu/breathing break. 💧\n\n`);
     } else if (state === 'deep-focus') {
-      tooltipMarkdown.appendMarkdown(`> 🔥 **In Flow State.** Notifications and non-urgent alerts are silenced.\n\n`);
+      tooltipMarkdown.appendMarkdown(`> 🔮 **In Deep Flow.** All notifications and non-spiritual alerts are suppressed.\n\n`);
     }
 
     tooltipMarkdown.appendMarkdown(`---\n`);
@@ -88,6 +121,7 @@ export class DevAuraStatusBar {
 
   /**
    * Helper to fetch color, label and icon based on FocusState
+   * Uses Material You tonal accent palettes from design.md
    */
   private getStateConfig(state: FocusState) {
     switch (state) {
@@ -95,33 +129,45 @@ export class DevAuraStatusBar {
         return {
           icon: '💤',
           label: 'Idle',
-          color: new vscode.ThemeColor('statusBarItem.prominentForeground')
+          color: '#E3E3E3' // On Surface Neutral
         };
       case 'warming-up':
         return {
           icon: '🌱',
           label: 'Warming Up',
-          color: '#81e6d9' // Teal
+          color: '#0B57D0' // Primary Google Blue
         };
       case 'focus':
         return {
           icon: '🔥',
-          label: 'Focusing',
-          color: '#63b3ed' // Ocean Blue
+          label: 'Flowing',
+          color: '#1EA896' // Secondary Teal/Islamic Green
         };
       case 'deep-focus':
         return {
-          icon: '⚡',
-          label: 'Deep Flow',
-          color: '#ecc94b' // Amber/Yellow
+          icon: '🔮',
+          label: 'Deep Focus',
+          color: '#7C4DFF' // Dynamic Purple Accent
         };
       case 'frustrated':
         return {
           icon: '🤯',
           label: 'Struggling',
-          color: '#fc8181' // Soft Red
+          color: '#FFB300' // Dynamic Amber Accent
         };
     }
+  }
+
+  /**
+   * Format seconds to short HHh MMm or MMm
+   */
+  private formatTimeShort(totalSeconds: number): string {
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    if (hrs > 0) {
+      return `${hrs}h ${mins}m`;
+    }
+    return `${mins}m`;
   }
 
   /**
