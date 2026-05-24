@@ -1,0 +1,98 @@
+{
+  "name": "devaura",
+  "displayName": "DevAura",
+  "description": "Your AI companion that keeps you coding, praying, eating, and breathing in perfect balance.",
+  "version": "0.1.0",
+  "publisher": "devaura-team",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "devaura.checkIn",
+        "title": "DevAura: Check In (Solat/Makan)",
+        "icon": "$(check)"
+      },
+      {
+        "command": "devaura.openDashboard",
+        "title": "DevAura: Open Wellness Dashboard",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "devaura.toggleMute",
+        "title": "DevAura: Toggle Azan Mute (Meeting Mode)",
+        "icon": "$(mute)"
+      },
+      {
+        "command": "devaura.parseMilestones",
+        "title": "DevAura: Parse Project Brief Milestones"
+      }
+    ],
+    "configuration": {
+      "title": "DevAura",
+      "properties": {
+        "devaura.backendUrl": {
+          "type": "string",
+          "default": "http://localhost:8080",
+          "description": "DevAura Cloud Run backend server URL."
+        },
+        "devaura.userId": {
+          "type": "string",
+          "default": "dev_user_1",
+          "description": "Your DevAura User ID for syncing state."
+        },
+        "devaura.prayerTimes.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable prayer/solat alerts and status bar tracking."
+        },
+        "devaura.prayerTimes.latitude": {
+          "type": "number",
+          "default": -6.2088,
+          "description": "Latitude for prayer times calculation (defaults to Jakarta)."
+        },
+        "devaura.prayerTimes.longitude": {
+          "type": "number",
+          "default": 106.8456,
+          "description": "Longitude for prayer times calculation (defaults to Jakarta)."
+        },
+        "devaura.nutrition.mealsEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable meals & hydration alerts."
+        },
+        "devaura.nutrition.lunchTime": {
+          "type": "string",
+          "default": "12:00",
+          "description": "Your preferred lunch time."
+        },
+        "devaura.gamification.soundEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable sound notifications for alerts (e.g. Azan, break alerts)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "echo 'No linting tool configured yet'",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^16.18.34",
+    "typescript": "^4.9.5"
+  }
+}

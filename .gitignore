@@ -1,0 +1,16 @@
+# VSCode Extension build outputs
+node_modules/
+out/
+.vscode-test/
+*.vsix
+
+# Python Backend build outputs
+backend/__pycache__/
+backend/*/__pycache__/
+backend/venv/
+.env
+
+# General ignores
+.DS_Store
+.system_generated/
+*.log
