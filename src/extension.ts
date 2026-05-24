@@ -234,7 +234,7 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
 
   // Map state accent styling according to design.md dynamic states
   let stateAccent = '#0B57D0'; // Google Blue (Neutral/Idle)
-  let stateGlow = 'rgba(11, 87, 208, 0.2)';
+  let stateGlow = 'rgba(11, 87, 208, 0.15)';
   
   if (flowState === 'DEEP-FOCUS') {
     stateAccent = '#7C4DFF'; // Accent Purple (Deep Focus)
@@ -253,37 +253,53 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>DevAura Weekly Balance Report Card</title>
+      
+      <!-- Import Lucide Icons via CDN -->
+      <script src="https://unpkg.com/lucide@latest"></script>
+      
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;700&display=swap');
         
         :root {
-          --md-sys-color-primary: #0B57D0;
-          --md-sys-color-secondary: #1EA896;
-          --md-sys-color-surface: #1E1E1E;
-          --md-sys-color-on-surface: #E3E3E3;
-          --md-sys-color-background: #121212;
+          /* Fallback variables mapped dynamically to VSCode theme colors */
+          --bg-main: var(--vscode-editor-background, #121212);
+          --text-main: var(--vscode-editor-foreground, #E3E3E3);
+          
+          --card-bg: var(--vscode-editorWidget-background, rgba(30, 30, 30, 0.5));
+          --card-border: var(--vscode-editorWidget-border, rgba(255, 255, 255, 0.06));
+          --border-color: rgba(255, 255, 255, 0.05);
+
+          --accent-primary: var(--vscode-button-background, #0B57D0);
+          --accent-primary-hover: var(--vscode-button-hoverBackground, #185abc);
+          --accent-secondary: #1EA896; /* Islamic Teal */
           
           --accent-purple: #7C4DFF;
           --accent-amber: #FFB300;
           --accent-coral: #EA4335;
-          --border: rgba(255, 255, 255, 0.06);
+        }
+
+        /* Automatically adjust variables if a Light Theme is active inside VSCode */
+        body.vscode-light {
+          --border-color: rgba(0, 0, 0, 0.08);
+          --card-border: var(--vscode-widget-border, rgba(0, 0, 0, 0.12));
+          --card-bg: var(--vscode-editorWidget-background, rgba(240, 240, 240, 0.75));
         }
 
         * {
           box-sizing: border-box;
-          transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+          transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
 
         body {
           font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
-          background-color: var(--md-sys-color-background);
-          color: var(--md-sys-color-on-surface);
+          background-color: var(--bg-main);
+          color: var(--text-main);
           margin: 0;
           padding: 32px 24px;
           min-height: 100vh;
           background-image: 
-            radial-gradient(circle at 5% 5%, rgba(11, 87, 208, 0.04) 0%, transparent 35%),
-            radial-gradient(circle at 95% 95%, rgba(30, 168, 150, 0.04) 0%, transparent 40%);
+            radial-gradient(circle at 5% 5%, rgba(11, 87, 208, 0.03) 0%, transparent 35%),
+            radial-gradient(circle at 95% 95%, rgba(30, 168, 150, 0.03) 0%, transparent 40%);
         }
 
         .container {
@@ -297,41 +313,44 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           justify-content: space-between;
           align-items: center;
           margin-bottom: 40px;
-          background: rgba(30, 30, 30, 0.4);
-          border: 1px solid var(--border);
+          background: var(--card-bg);
+          border: 1px solid var(--card-border);
           border-radius: 20px;
-          padding: 20px 28px;
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          padding: 16px 28px;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
         }
 
         .logo {
           font-family: 'Outfit', sans-serif;
-          font-size: 26px;
+          font-size: 24px;
           font-weight: 800;
           letter-spacing: 0.5px;
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
         }
         
-        .logo-dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-secondary));
-          box-shadow: 0 0 10px rgba(11, 87, 208, 0.5);
+        .logo-icon {
+          color: var(--accent-secondary);
+          stroke-width: 2.5px;
+          animation: pulse 2.5s infinite ease-in-out;
         }
 
         .user-badge {
           background: rgba(255, 255, 255, 0.04);
-          border: 1px solid var(--border);
-          padding: 8px 20px;
+          border: 1px solid var(--border-color);
+          padding: 8px 18px;
           border-radius: 99px;
           font-size: 13px;
           font-weight: 600;
-          color: rgba(227, 227, 227, 0.8);
-          letter-spacing: 0.25px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        body.vscode-light .user-badge {
+          background: rgba(0, 0, 0, 0.03);
         }
 
         /* Title block */
@@ -345,13 +364,10 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           font-weight: 800;
           margin: 0 0 8px 0;
           letter-spacing: -0.5px;
-          background: linear-gradient(135deg, #E3E3E3 40%, rgba(227, 227, 227, 0.5) 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
         }
 
         .title-block p {
-          color: rgba(227, 227, 227, 0.6);
+          opacity: 0.7;
           margin: 0;
           font-size: 15px;
         }
@@ -366,19 +382,20 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
 
         /* MD3 Card Layout: Melengkung 16px */
         .card {
-          background: var(--md-sys-color-surface);
-          border: 1px solid var(--border);
+          background: var(--card-bg);
+          border: 1px solid var(--card-border);
           border-radius: 16px;
           padding: 26px;
           position: relative;
           overflow: hidden;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+          backdrop-filter: blur(5px);
         }
 
         .card:hover {
           transform: translateY(-3px);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-          border-color: rgba(255, 255, 255, 0.12);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+          border-color: var(--accent-primary);
         }
 
         .card-header {
@@ -391,13 +408,24 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
         .card-title {
           font-size: 13px;
           font-weight: 700;
-          color: rgba(227, 227, 227, 0.5);
+          opacity: 0.6;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
 
-        .icon {
-          font-size: 22px;
+        .icon-wrapper {
+          width: 38px;
+          height: 38px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--border-color);
+        }
+        
+        body.vscode-light .icon-wrapper {
+          background: rgba(0, 0, 0, 0.03);
         }
 
         /* Google Sans Display for numbers/metrics */
@@ -411,17 +439,17 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
 
         .card-subtitle {
           font-size: 14px;
-          color: rgba(227, 227, 227, 0.6);
+          opacity: 0.7;
         }
 
         /* Dynamic coloring matching design.md */
         .accent-dynamic {
           color: ${stateAccent};
-          text-shadow: 0 0 15px ${stateGlow};
+          text-shadow: 0 0 10px ${stateGlow};
         }
 
         .accent-teal {
-          color: var(--md-sys-color-secondary);
+          color: var(--accent-secondary);
         }
 
         .accent-purple {
@@ -444,6 +472,10 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           overflow: hidden;
           margin-top: 16px;
         }
+        
+        body.vscode-light .score-bar {
+          background: rgba(0, 0, 0, 0.05);
+        }
 
         .score-progress {
           height: 100%;
@@ -452,12 +484,13 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
 
         /* Section Cards */
         .section-card {
-          background: var(--md-sys-color-surface);
-          border: 1px solid var(--border);
+          background: var(--card-bg);
+          border: 1px solid var(--card-border);
           border-radius: 16px;
-          padding: 30px;
+          padding: 28px;
           margin-bottom: 32px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+          backdrop-filter: blur(5px);
         }
 
         .section-header {
@@ -465,13 +498,13 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           align-items: center;
           gap: 12px;
           margin-bottom: 24px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-          padding-bottom: 16px;
+          border-bottom: 1px solid var(--border-color);
+          padding-bottom: 14px;
         }
 
         .section-header h2 {
           font-family: 'Outfit', sans-serif;
-          font-size: 20px;
+          font-size: 19px;
           font-weight: 700;
           margin: 0;
           letter-spacing: -0.25px;
@@ -481,34 +514,49 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
         .balance-list {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 14px;
         }
 
         .balance-item {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 12px 18px;
+          padding: 12px 20px;
           background: rgba(255, 255, 255, 0.02);
           border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--border-color);
+        }
+        
+        body.vscode-light .balance-item {
+          background: rgba(0, 0, 0, 0.01);
         }
 
         .balance-label {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 16px;
           font-weight: 600;
-          font-size: 14px;
+          font-size: 14.5px;
+        }
+        
+        .balance-icon-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .balance-status {
           font-family: 'Roboto Mono', monospace;
-          font-size: 13px;
+          font-size: 12.5px;
           background: rgba(255, 255, 255, 0.04);
           padding: 4px 12px;
           border-radius: 8px;
           font-weight: 700;
+          border: 1px solid var(--border-color);
+        }
+        
+        body.vscode-light .balance-status {
+          background: rgba(0, 0, 0, 0.03);
         }
 
         /* Solat Dot Tracker */
@@ -529,7 +577,7 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           height: 38px;
           border-radius: 50%;
           background: rgba(255, 255, 255, 0.03);
-          border: 1px solid var(--border);
+          border: 1px solid var(--border-color);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -537,18 +585,22 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           font-size: 15px;
           font-weight: bold;
         }
+        
+        body.vscode-light .solat-dot {
+          background: rgba(0, 0, 0, 0.02);
+        }
 
         .solat-dot.active {
-          background: linear-gradient(135deg, #1EA896 0%, #178274 100%);
+          background: linear-gradient(135deg, var(--accent-secondary) 0%, #178274 100%);
           border: none;
           color: white;
-          box-shadow: 0 4px 15px rgba(30, 168, 150, 0.35);
+          box-shadow: 0 4px 12px rgba(30, 168, 150, 0.25);
         }
 
         .solat-name {
           font-size: 12px;
           font-weight: 600;
-          color: rgba(227, 227, 227, 0.6);
+          opacity: 0.7;
         }
 
         /* Google AI UX Blockquote Insight Section */
@@ -559,13 +611,11 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           padding: 20px 24px;
           margin: 32px 0 0 0;
           display: flex;
-          gap: 16px;
+          gap: 18px;
           align-items: flex-start;
-        }
-
-        .insight-icon {
-          font-size: 26px;
-          color: var(--accent-purple);
+          border-top: 1px solid var(--border-color);
+          border-right: 1px solid var(--border-color);
+          border-bottom: 1px solid var(--border-color);
         }
 
         .insight-content h4 {
@@ -573,7 +623,7 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           font-family: 'Outfit', sans-serif;
           font-size: 15px;
           font-weight: 700;
-          color: rgba(227, 227, 227, 0.9);
+          opacity: 0.9;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
@@ -581,7 +631,7 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
         .insight-content p {
           margin: 0;
           font-size: 14.5px;
-          color: rgba(227, 227, 227, 0.75);
+          opacity: 0.8;
           line-height: 1.5;
         }
 
@@ -593,10 +643,10 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
         }
 
         .btn-filled-tonal {
-          background: rgba(11, 87, 208, 0.15);
-          color: #8ab4f8;
-          border: 1px solid rgba(11, 87, 208, 0.3);
-          padding: 12px 20px;
+          background: var(--vscode-button-background, var(--accent-primary));
+          color: var(--vscode-button-foreground, white);
+          border: none;
+          padding: 10px 22px;
           border-radius: 99px;
           font-size: 13.5px;
           font-weight: 600;
@@ -608,26 +658,39 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
         }
 
         .btn-filled-tonal:hover {
-          background: rgba(11, 87, 208, 0.25);
-          border-color: #8ab4f8;
+          background: var(--vscode-button-hoverBackground, var(--accent-primary-hover));
           transform: translateY(-1px);
         }
 
         .btn-text {
           background: transparent;
-          color: rgba(227, 227, 227, 0.6);
+          color: var(--text-main);
+          opacity: 0.6;
           border: none;
-          padding: 12px 20px;
+          padding: 10px 22px;
           border-radius: 99px;
           font-size: 13.5px;
           font-weight: 600;
           cursor: pointer;
           font-family: 'Plus Jakarta Sans', sans-serif;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .btn-text:hover {
-          color: var(--md-sys-color-on-surface);
+          opacity: 1;
           background: rgba(255, 255, 255, 0.04);
+        }
+        
+        body.vscode-light .btn-text:hover {
+          background: rgba(0, 0, 0, 0.04);
+        }
+
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.08); opacity: 0.8; }
+          100% { transform: scale(1); opacity: 1; }
         }
       </style>
     </head>
@@ -635,15 +698,18 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
       <div class="container">
         <header>
           <div class="logo">
-            <div class="logo-dot"></div>
+            <i data-lucide="sparkles" class="logo-icon"></i>
             🌌 DevAura
           </div>
-          <div class="user-badge">👤 dev_user_1 (Jakarta)</div>
+          <div class="user-badge">
+            <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+            dev_user_1 (Jakarta)
+          </div>
         </header>
 
         <div class="title-block">
           <h1>✨ DevAura Weekly Balance Report Card</h1>
-          <p>Scaffolding prototype loaded. Sync state: <b>Active</b></p>
+          <p>Sync state: <b>Active</b> | Theme dynamic variables: <b>Loaded</b></p>
         </div>
 
         <div class="dashboard-grid">
@@ -651,7 +717,9 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           <div class="card">
             <div class="card-header">
               <span class="card-title">Active Focus State</span>
-              <span class="icon">⚡</span>
+              <div class="icon-wrapper accent-dynamic">
+                <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
+              </div>
             </div>
             <div class="value accent-dynamic">${flowState}</div>
             <div class="card-subtitle">Focus Velocity: <b>${Math.round(currentKeystrokes / 2 + 1)} KPM</b></div>
@@ -664,12 +732,14 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           <div class="card">
             <div class="card-header">
               <span class="card-title">Daily Wellness Score</span>
-              <span class="icon">🏆</span>
+              <div class="icon-wrapper accent-teal">
+                <i data-lucide="award" style="width: 18px; height: 18px;"></i>
+              </div>
             </div>
             <div class="value accent-teal">${score}/100</div>
             <div class="card-subtitle">Streaks maintained perfectly 🔥</div>
             <div class="score-bar">
-              <div class="score-progress" style="width: ${score}%; background: linear-gradient(90deg, var(--md-sys-color-secondary), #43e97b);"></div>
+              <div class="score-progress" style="width: ${score}%; background: linear-gradient(90deg, var(--accent-secondary), #43e97b);"></div>
             </div>
           </div>
 
@@ -677,7 +747,9 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           <div class="card">
             <div class="card-header">
               <span class="card-title">Frustration Index</span>
-              <span class="icon">🤯</span>
+              <div class="icon-wrapper accent-coral">
+                <i data-lucide="flame" style="width: 18px; height: 18px;"></i>
+              </div>
             </div>
             <div class="value accent-coral">${currentFrustration}%</div>
             <div class="card-subtitle">Corrections: <b>${currentCorrections}</b> / Saves: <b>${currentSaves}</b></div>
@@ -690,27 +762,33 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
         <!-- Section 1 (Metrics Layout) - Adhering to Spec 4.3 -->
         <div class="section-card">
           <div class="section-header">
-            <span class="icon">📊</span>
+            <i data-lucide="activity" style="width: 20px; height: 20px; color: var(--accent-secondary);"></i>
             <h2>Weekly Balance Metrics</h2>
           </div>
           <div class="balance-list">
             <div class="balance-item">
               <div class="balance-label">
-                <span class="accent-teal">🟢</span>
+                <div class="balance-icon-container accent-teal">
+                  <i data-lucide="sun" style="width: 16px; height: 16px;"></i>
+                </div>
                 <span><b>Solat Tracker:</b> 22/25 On Time (Streak 🔥)</span>
               </div>
               <div class="balance-status accent-teal">Excellent</div>
             </div>
             <div class="balance-item">
               <div class="balance-label">
-                <span class="accent-amber">🟡</span>
+                <div class="balance-icon-container accent-amber">
+                  <i data-lucide="utensils" style="width: 16px; height: 16px;"></i>
+                </div>
                 <span><b>Meal Nutrition:</b> Skip lunch twice (Inferred from idle state)</span>
               </div>
               <div class="balance-status accent-amber">Warning</div>
             </div>
             <div class="balance-item">
               <div class="balance-label">
-                <span class="accent-coral">🔴</span>
+                <div class="balance-icon-container accent-coral">
+                  <i data-lucide="moon" style="width: 16px; height: 16px;"></i>
+                </div>
                 <span><b>Sleep Pattern:</b> 3 nights coded past 2 AM</span>
               </div>
               <div class="balance-status accent-coral">High Risk</div>
@@ -721,12 +799,14 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
         <!-- Pillar 1: Solat Tracker Status -->
         <div class="section-card">
           <div class="section-header">
-            <span class="icon">🕌</span>
+            <i data-lucide="compass" style="width: 20px; height: 20px; color: var(--accent-secondary);"></i>
             <h2>Ibadah Guardian — Real-time timings</h2>
           </div>
-          <p style="font-size: 14.5px; color: rgba(227, 227, 227, 0.6); margin-top: 0; margin-bottom: 20px;">
+          <p style="font-size: 14.5px; opacity: 0.7; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="refresh-cw" style="width: 14px; height: 14px; stroke-width: 2px;"></i>
             Prayer Sync: <b>Active</b> | Coordinates: <b>-6.2088, 106.8456 (Jakarta)</b> | Next prayer: <b>${nextPrayer}</b> in <b>${minsStr}</b>
           </p>
+          
           <div class="solat-tracker">
             <div class="solat-node">
               <div class="solat-dot active">✓</div>
@@ -751,20 +831,33 @@ function getDashboardHtml(stats: TrackerStats | null, nextPrayer = 'None', minsR
           </div>
           
           <div class="actions-panel">
-            <button class="btn-filled-tonal">🕌 Sudah Solat</button>
-            <button class="btn-text">Tunda 5 Menit</button>
+            <button class="btn-filled-tonal">
+              <i data-lucide="check" style="width: 14px; height: 14px;"></i>
+              Sudah Solat
+            </button>
+            <button class="btn-text">
+              <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+              Tunda 5 Menit
+            </button>
           </div>
         </div>
 
         <!-- Google AI UX Blockquote Insight Section -->
         <blockquote class="insight-quote">
-          <div class="insight-icon">🔮</div>
+          <div class="balance-icon-container accent-purple" style="margin-top: 2px;">
+            <i data-lucide="brain" style="width: 24px; height: 24px;"></i>
+          </div>
           <div class="insight-content">
             <h4>Burnout Prediction (Gemini Engine)</h4>
             <p>"Bro, risiko burnout lu terdeteksi sedang dalam 3 hari ke depan. Kurangi coding malam di atas jam 11 malam, dan biasakan istirahat makan teratur. Ingat, program lu penting, ginjal lu jauh lebih penting."</p>
           </div>
         </blockquote>
       </div>
+      
+      <!-- Initialize Lucide Icons -->
+      <script>
+        lucide.createIcons();
+      </script>
     </body>
     </html>
   `;
